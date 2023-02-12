@@ -18,6 +18,8 @@ Components allow users to interact with your bot through interactive UI elements
 		<div slot="actions">
 			<DiscordButtons>
 				<DiscordButton type="success">Yes</DiscordButton>
+			</DiscordButtons>
+			<DiscordButtons>
 				<DiscordButton type="danger">No</DiscordButton>
 			</DiscordButtons>
 		</div>
@@ -25,9 +27,9 @@ Components allow users to interact with your bot through interactive UI elements
 </DiscordMessages>
 <br />
 
-The code for this command is given below.
+We will now demonstrate the two primary ways you can achieve the button layout above
 
-```python title="buttons.py"
+```python title="buttons.py -- Low Level Implementation"
 # At the top of the file.
 import disnake
 from disnake.ext import commands
@@ -38,26 +40,24 @@ async def buttons(inter: disnake.ApplicationCommandInteraction):
     await inter.response.send_message(
         "Need help?",
         components=[
-            disnake.ui.Button(label="Yes", style=disnake.ButtonStyle.success, custom_id="yes"),
-            disnake.ui.Button(label="No", style=disnake.ButtonStyle.danger, custom_id="no"),
+            disnake.ui.Button(label="Yes", style=disnake.ButtonStyle.success, custom_id="help_yes"),
+            disnake.ui.Button(label="No", style=disnake.ButtonStyle.danger, custom_id="help_no"),
         ],
     )
 
 
 @bot.listen("on_button_click")
 async def help_listener(inter: disnake.MessageInteraction):
-    if inter.component.custom_id not in ["yes", "no"]:
+    if not inter.component.custom_id.startswith("help"):
         # We filter out any other button presses except
         # the components we wish to process.
         return
 
-    if inter.component.custom_id == "yes":
+    if inter.component.custom_id == "help_yes":
         await inter.response.send_message("Contact us at https://discord.gg/disnake!")
-    elif inter.component.custom_id == "no":
+    elif inter.component.custom_id == "help_no":
         await inter.response.send_message("Got it. Signing off!")
 ```
-
-## Building and sending buttons
 
 ## Button styles
 
@@ -89,12 +89,9 @@ async def help_listener(inter: disnake.MessageInteraction):
 
 :::note
 
-`Link` buttons _cannot_ have a `custom_id`, and _do not_ send an interaction event when clicked.
+`Link` buttons _cannot_ have a `custom_id`, and _do not_ send an interaction event when clicked.  
+Nor can their style be customized. 
 
 :::
 
-### Disabled buttons
-
 ## Receiving button callback
-
-## Views vs. low-level components
